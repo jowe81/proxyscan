@@ -1,0 +1,108 @@
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    margin: 2em; 
+    background-color: #f4f4f9; 
+    color: #333; 
+}
+h1 { 
+    color: #444; 
+    border-bottom: 2px solid #ddd; 
+    padding-bottom: 0.3em; 
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#service-search {
+    display: block;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 2em auto;
+    padding: 0.75em;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fff;
+}
+ul {
+    list-style-type: none;
+    padding: 1em 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5em;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+li { 
+    background-color: #fff; 
+    border-radius: 8px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+    width: 280px;
+    height: 200px;
+}
+li:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transform: translateY(-5px);
+}
+li a { 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; 
+    padding: 1.5em 1em;
+    text-decoration: none; 
+    color: inherit;
+    border-radius: 8px;
+    transition: background-color 0.2s ease-in-out;
+    height: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+li a:hover { 
+    background-color: #e9ecef; 
+}
+.name {
+    font-weight: 500;
+    color: #007bff;
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+}
+.url { 
+    color: #6c757d; 
+    font-size: 0.9em; 
+    word-break: break-all;
+}
+.last-seen {
+    margin-top: 0.75em;
+    font-size: 0.8em;
+    color: #dc3545;
+    font-style: italic;
+}
+.status-dot {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.status-dot.online {
+    background-color: #28a745; /* Green */
+}
+.status-dot.offline {
+    background-color: #dc3545; /* Red */
+}
+.status-dot.unknown {
+    background-color: #6c757d; /* Gray */
+}
+code { background-color: #e3e3e3; padding: 2px 4px; border-radius: 3px; }
+p { 
+    line-height: 1.6; max-width: 800px; margin-left: auto; margin-right: auto;
+    text-align: center;
+}
