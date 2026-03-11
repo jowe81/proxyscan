@@ -11,7 +11,7 @@ const port = process.env.PORT || 3333;
 const nginxPath = process.env.NGINX_SITES_PATH || '/etc/nginx/sites-enabled';
 
 // The number of services needed to show the search field.
-const SEARCH_THRESHOLD = process.env.SEARCH_THRESHOLD || 5;
+const SEARCH_THRESHOLD = process.env.SEARCH_THRESHOLD || 3;
 
 // The interval for backend health checks in milliseconds (pings the services).
 const HEALTH_CHECK_INTERVAL_MS = process.env.HEALTH_CHECK_INTERVAL_MS || 30000;
