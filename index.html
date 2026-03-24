@@ -7,7 +7,13 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Intranet Services</h1>
+    <h1>
+        Intranet Services
+        <div id="internet-status">
+            <span>Internet</span>
+            <span class="status-dot {{internet_status}}"></span>
+        </div>
+    </h1>
     {{search_bar}}
     {{content}}
     {{client_script}}

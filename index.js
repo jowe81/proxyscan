@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 
 const app = express();
 const port = process.env.PORT || 3333;
@@ -20,6 +21,7 @@ const HEALTH_CHECK_INTERVAL_MS = process.env.HEALTH_CHECK_INTERVAL_MS || 30000;
 const FRONTEND_POLL_INTERVAL_MS = process.env.FRONTEND_POLL_INTERVAL_MS || 15000;
 
 const serviceStatus = {};
+let internetStatus = 'unknown';
 
 const logger = {
     info: (...args) => console.log(`[${new Date().toISOString()}]`, ...args),
@@ -120,6 +122,32 @@ function parseNginxConfigs(dirPath, excludePort) {
 }
 
 /**
+ * Checks connectivity to the internet.
+ */
+const checkInternetStatus = async () => {
+    const hosts = ['1.1.1.1', '8.8.8.8', '9.9.9.9']; // Cloudflare, Google, Quad9
+    const countFlag = process.platform === 'win32' ? '-n' : '-c';
+
+    const pingHost = (host) => new Promise((resolve) => {
+        exec(`ping ${countFlag} 1 ${host}`, { timeout: 5000 }, (error) => {
+            resolve(!error);
+        });
+    });
+
+    // Check all hosts in parallel.
+    const results = await Promise.all(hosts.map(pingHost));
+    const successCount = results.filter(Boolean).length;
+
+    if (successCount === 0) {
+        internetStatus = 'offline';
+    } else if (successCount / hosts.length >= 0.5) {
+        internetStatus = 'online';
+    } else {
+        internetStatus = 'partial';
+    }
+};
+
+/**
  * Pings a single service URL to check its health and updates the status.
  * @param {string} url - The URL of the service to ping.
  */
@@ -155,6 +183,7 @@ const updateServiceStatus = async (url) => {
  * Fetches the list of Nginx sites and pings all of them to update their status.
  */
 const updateAllStatuses = async () => {
+    await checkInternetStatus();
     const { sites } = parseNginxConfigs(nginxPath, port);
     if (!sites || sites.length === 0) {
         logger.info('No services found to ping.');
@@ -164,7 +193,7 @@ const updateAllStatuses = async () => {
     // Use Promise.all to ping all services concurrently.
     await Promise.all(sites.map(site => updateServiceStatus(site.url)));
     const onlineCount = sites.filter(site => serviceStatus[site.url]?.status === 'online').length;
-    logger.info(`Health checks complete: ${onlineCount}/${sites.length} services online`);
+    logger.info(`Health checks complete: ${onlineCount}/${sites.length} services online. Internet: ${internetStatus}`);
 };
 
 app.get('/styles.css', (req, res) => {
@@ -176,7 +205,7 @@ app.get('/client.js', (req, res) => {
 });
 
 app.get('/api/status', (req, res) => {
-    res.json(serviceStatus);
+    res.json({ services: serviceStatus, internet: internetStatus });
 });
 
 app.get('/', (req, res) => {
@@ -216,6 +245,7 @@ app.get('/', (req, res) => {
 
         const html = htmlTemplate
             .replace('{{search_bar}}', searchBarHtml)
+            .replace('{{internet_status}}', internetStatus)
             .replace('{{content}}', content)
             .replace('{{client_script}}', clientScriptHtml);
         res.send(html);

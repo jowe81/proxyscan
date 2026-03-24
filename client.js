@@ -46,7 +46,14 @@ const updateAllStatuses = async () => {
     try {
         const response = await fetch('/api/status');
         if (!response.ok) return;
-        const statuses = await response.json();
+        const data = await response.json();
+
+        const internetDot = document.querySelector('#internet-status .status-dot');
+        if (internetDot && data.internet) {
+            internetDot.className = 'status-dot ' + data.internet;
+        }
+
+        const statuses = data.services || data;
         document.querySelectorAll('li[data-url]').forEach(serviceLi => {
             const url = serviceLi.dataset.url;
             if (statuses[url]) {

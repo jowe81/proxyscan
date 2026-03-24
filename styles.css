@@ -11,6 +11,9 @@ h1 {
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 #service-search {
     display: block;
@@ -83,17 +86,31 @@ li a:hover {
     font-style: italic;
 }
 .status-dot {
-    position: absolute;
-    top: 1em;
-    right: 1em;
     width: 12px;
     height: 12px;
     border-radius: 50%;
     border: 2px solid #fff;
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    display: inline-block;
 }
+li .status-dot {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+#internet-status {
+    font-size: 1rem;
+    font-weight: normal;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+} 
 .status-dot.online {
     background-color: #28a745; /* Green */
+}
+.status-dot.partial {
+    background-color: #fd7e14; /* Orange */
 }
 .status-dot.offline {
     background-color: #dc3545; /* Red */
