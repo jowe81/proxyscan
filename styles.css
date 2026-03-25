@@ -93,6 +93,42 @@ li a:hover {
     box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     display: inline-block;
 }
+.history-icon {
+    cursor: pointer;
+    margin-left: 0.5em;
+    font-size: 1.2em;
+    display: none; /* Hidden by default */
+    user-select: none;
+}
+.history-icon:hover {
+    transform: scale(1.1);
+}
+#modal-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+#outage-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 1000;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+#outage-modal h2 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 0.5em; }
+#outage-modal ul { display: block; list-style: none; padding: 0; max-width: none; }
+#outage-modal li { width: auto; height: auto; margin-bottom: 0.5em; border-bottom: 1px solid #eee; padding: 0.5em 0; box-shadow: none; background: none; }
+#outage-modal li:hover { transform: none; box-shadow: none; background: none; }
 li .status-dot {
     position: absolute;
     top: 1em;

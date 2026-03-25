@@ -12,8 +12,14 @@
         <div id="internet-status">
             <span>Internet</span>
             <span class="status-dot {{internet_status}}"></span>
+            <span id="history-btn" class="history-icon" title="View Outage History">🕒</span>
         </div>
     </h1>
+    <div id="modal-backdrop"></div>
+    <div id="outage-modal">
+        <h2>Internet Outage History</h2>
+        <ul id="outage-list"></ul>
+    </div>
     {{search_bar}}
     {{content}}
     {{client_script}}

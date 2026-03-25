@@ -22,11 +22,46 @@ const FRONTEND_POLL_INTERVAL_MS = process.env.FRONTEND_POLL_INTERVAL_MS || 15000
 
 const serviceStatus = {};
 let internetStatus = 'unknown';
+const outageHistory = [];
+let currentOutageStart = null;
+const OUTAGES_FILE = path.join(__dirname, 'outages.json');
 
 const logger = {
     info: (...args) => console.log(`[${new Date().toISOString()}]`, ...args),
     error: (...args) => console.error(`[${new Date().toISOString()}]`, ...args)
 };
+
+/**
+ * Loads the outage history from a JSON file.
+ */
+function loadOutages() {
+    try {
+        if (!fs.existsSync(OUTAGES_FILE)) {
+            fs.writeFileSync(OUTAGES_FILE, '[]');
+            logger.info(`Created outages file at ${OUTAGES_FILE}`);
+            return;
+        }
+
+        const data = fs.readFileSync(OUTAGES_FILE, 'utf8');
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) {
+            outageHistory.push(...parsed);
+        }
+    } catch (err) {
+        logger.error('Error loading/creating outages file:', err);
+    }
+}
+
+/**
+ * Saves the outage history to a JSON file.
+ */
+function saveOutages() {
+    try {
+        fs.writeFileSync(OUTAGES_FILE, JSON.stringify(outageHistory, null, 2));
+    } catch (err) {
+        logger.error('Error saving outages:', err);
+    }
+}
 
 /**
  * Parses Nginx configuration files to find services proxied to localhost.
@@ -139,11 +174,22 @@ const checkInternetStatus = async () => {
     const successCount = results.filter(Boolean).length;
 
     if (successCount === 0) {
+        if (internetStatus !== 'offline') {
+            currentOutageStart = Date.now();
+        }
         internetStatus = 'offline';
-    } else if (successCount / hosts.length >= 0.5) {
-        internetStatus = 'online';
     } else {
-        internetStatus = 'partial';
+        if (internetStatus === 'offline' && currentOutageStart) {
+            outageHistory.push({ start: currentOutageStart, end: Date.now() });
+            currentOutageStart = null;
+            saveOutages();
+        }
+        
+        if (successCount / hosts.length >= 0.5) {
+            internetStatus = 'online';
+        } else {
+            internetStatus = 'partial';
+        }
     }
 };
 
@@ -205,7 +251,13 @@ app.get('/client.js', (req, res) => {
 });
 
 app.get('/api/status', (req, res) => {
-    res.json({ services: serviceStatus, internet: internetStatus });
+    // Include the current ongoing outage in the history sent to client
+    const historyToSend = [...outageHistory];
+    if (currentOutageStart) {
+        historyToSend.push({ start: currentOutageStart, end: null });
+    }
+    // Return newest outages first
+    res.json({ services: serviceStatus, internet: internetStatus, outageHistory: historyToSend.reverse() });
 });
 
 app.get('/', (req, res) => {
@@ -269,5 +321,6 @@ server.on('error', (err) => {
 // Run an initial health check on startup, then set the interval for subsequent checks.
 logger.info(`Health Check Interval: ${HEALTH_CHECK_INTERVAL_MS}ms`);
 logger.info(`Frontend Poll Interval: ${FRONTEND_POLL_INTERVAL_MS}ms`);
+loadOutages();
 updateAllStatuses();
 setInterval(updateAllStatuses, HEALTH_CHECK_INTERVAL_MS);
