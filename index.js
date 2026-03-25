@@ -11,6 +11,9 @@ const port = process.env.PORT || 3333;
 // The user's example mentioned /var/nginx/sites-enabled.
 const nginxPath = process.env.NGINX_SITES_PATH || '/etc/nginx/sites-enabled';
 
+// Comma-separated list of system services to monitor (e.g. "smbd,mongod")
+const SYSTEM_SERVICES = process.env.SYSTEM_SERVICES ? process.env.SYSTEM_SERVICES.split(',').map(s => s.trim()).filter(Boolean) : ['smbd', 'mongod', 'remoteCtrlForwarder'];
+
 // The number of services needed to show the search field.
 const SEARCH_THRESHOLD = process.env.SEARCH_THRESHOLD || 3;
 
@@ -194,6 +197,35 @@ const checkInternetStatus = async () => {
 };
 
 /**
+ * Checks if a systemd service is active.
+ * @param {string} serviceName 
+ * @returns {Promise<boolean>}
+ */
+const checkSystemService = (serviceName) => new Promise((resolve) => {
+    exec(`systemctl is-active ${serviceName}`, { timeout: 5000 }, (error, stdout) => {
+        // systemctl is-active returns 'active' and exit code 0 if running.
+        resolve(stdout && stdout.trim() === 'active');
+    });
+});
+
+const updateSystemServiceStatus = async (serviceName) => {
+    const key = `system:${serviceName}`;
+    const previousStatus = serviceStatus[key]?.status;
+    const isOnline = await checkSystemService(serviceName);
+
+    if (isOnline) {
+        if (previousStatus === 'offline') logger.info(`Service came back online: ${serviceName}`);
+        serviceStatus[key] = { status: 'online', lastSeenOnline: Date.now() };
+    } else {
+        // Only log offline if it wasn't already offline (and not undefined/initial load)
+        if (previousStatus !== 'offline' && previousStatus !== undefined) logger.error(`Service has gone offline: ${serviceName}`);
+        serviceStatus[key] = {
+            ...serviceStatus[key],
+            status: 'offline'
+        };
+    }
+};
+/**
  * Pings a single service URL to check its health and updates the status.
  * @param {string} url - The URL of the service to ping.
  */
@@ -231,15 +263,21 @@ const updateServiceStatus = async (url) => {
 const updateAllStatuses = async () => {
     await checkInternetStatus();
     const { sites } = parseNginxConfigs(nginxPath, port);
-    if (!sites || sites.length === 0) {
+    if ((!sites || sites.length === 0) && SYSTEM_SERVICES.length === 0) {
         logger.info('No services found to ping.');
         return;
     }
 
     // Use Promise.all to ping all services concurrently.
-    await Promise.all(sites.map(site => updateServiceStatus(site.url)));
-    const onlineCount = sites.filter(site => serviceStatus[site.url]?.status === 'online').length;
-    logger.info(`Health checks complete: ${onlineCount}/${sites.length} services online. Internet: ${internetStatus}`);
+    const sitePromises = sites.map(site => updateServiceStatus(site.url));
+    const systemPromises = SYSTEM_SERVICES.map(svc => updateSystemServiceStatus(svc));
+    await Promise.all([...sitePromises, ...systemPromises]);
+
+    const sitesOnline = sites.filter(site => serviceStatus[site.url]?.status === 'online').length;
+    const systemOnline = SYSTEM_SERVICES.filter(svc => serviceStatus[`system:${svc}`]?.status === 'online').length;
+    const total = sites.length + SYSTEM_SERVICES.length;
+
+    logger.info(`Health checks complete: ${sitesOnline + systemOnline}/${total} services online. Internet: ${internetStatus}`);
 };
 
 app.get('/styles.css', (req, res) => {
@@ -267,13 +305,11 @@ app.get('/', (req, res) => {
         status: serviceStatus[site.url]?.status || 'unknown'
     }));
 
-    let content;
-    if (error) {
-        content = `<p style="color: red;">${error}</p>`;
-    } else if (sitesWithStatus.length === 0) {
-        content = `<p>No server blocks with a 'proxy_pass' to 127.0.0.1 were found in <code>${nginxPath}</code>.</p>`;
-    } else {
-        const listItems = sitesWithStatus.map(site => `<li data-url="${site.url}">
+    let content = '';
+
+    // Websites Section
+    if (sitesWithStatus.length > 0) {
+        const listItems = sitesWithStatus.map(site => `<li data-key="${site.url}">
                 <a href="${site.url}" rel="noopener noreferrer">
                     <span class="status-dot ${site.status}"></span>
                     <span class="name">${site.name}</span>
@@ -281,10 +317,32 @@ app.get('/', (req, res) => {
                     <span class="last-seen"></span>
                 </a>
             </li>`).join('');
-        content = `<ul>${listItems}</ul>`;
+        content += `<h2>Websites</h2><ul>${listItems}</ul>`;
+    } else if (error) {
+        content += `<p style="color: red;">${error}</p>`;
+    } else if (SYSTEM_SERVICES.length === 0) {
+        content += `<p>No server blocks with a 'proxy_pass' to 127.0.0.1 were found in <code>${nginxPath}</code>.</p>`;
     }
 
-    const searchBarHtml = sitesWithStatus.length > SEARCH_THRESHOLD ? '<input type="search" id="service-search" placeholder="Search services..." aria-label="Search services">' : '';
+    // System Services Section
+    if (SYSTEM_SERVICES.length > 0) {
+        const listItems = SYSTEM_SERVICES.map(svc => {
+            const key = `system:${svc}`;
+            const status = serviceStatus[key]?.status || 'unknown';
+            return `<li data-key="${key}">
+                <div class="service-card">
+                    <span class="status-dot ${status}"></span>
+                    <span class="name">${svc}</span>
+                    <span class="url">System Service</span>
+                    <span class="last-seen"></span>
+                </div>
+            </li>`;
+        }).join('');
+        content += `<h2>System Services</h2><ul>${listItems}</ul>`;
+    }
+
+    const totalServices = sitesWithStatus.length + SYSTEM_SERVICES.length;
+    const searchBarHtml = totalServices > SEARCH_THRESHOLD ? '<input type="search" id="service-search" placeholder="Search services..." aria-label="Search services">' : '';
 
     const clientScriptHtml = `<script>window.CONFIG = { pollInterval: ${FRONTEND_POLL_INTERVAL_MS} };</script>
 <script src="/client.js" defer></script>`;

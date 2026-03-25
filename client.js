@@ -102,10 +102,10 @@ const updateAllStatuses = async () => {
         }
 
         const statuses = data.services || data;
-        document.querySelectorAll('li[data-url]').forEach(serviceLi => {
-            const url = serviceLi.dataset.url;
-            if (statuses[url]) {
-                updateTileUI(serviceLi, statuses[url]);
+        document.querySelectorAll('li[data-key]').forEach(serviceLi => {
+            const key = serviceLi.dataset.key;
+            if (statuses[key]) {
+                updateTileUI(serviceLi, statuses[key]);
             }
         });
     } catch (error) {
