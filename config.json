@@ -66,6 +66,11 @@
             "key": "remoteCtrlForwarder"
         },
         {
+            "name": "DNS Server",
+            "type": "systemd",
+            "key": "named"
+        },
+        {
             "name": "Jowe.ca",
             "type": "head",
             "key": "https://jowe.ca"
