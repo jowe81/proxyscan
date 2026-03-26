@@ -1,15 +1,16 @@
-function formatTimeAgo(timestamp) {
+function formatTimeAgo(timestamp, short = false) {
     if (!timestamp) return '';
     const now = Date.now();
     const seconds = Math.floor((now - timestamp) / 1000);
-    if (seconds < 2) return 'just now';
-    if (seconds < 60) return `${seconds}s ago`;
+    const suffix = short ? '' : ' ago';
+    if (seconds < 2) return short ? 'now' : 'just now';
+    if (seconds < 60) return `${seconds}s${suffix}`;
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60) return `${minutes}m${suffix}`;
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+    if (hours < 24) return `${hours}h${suffix}`;
     const days = Math.floor(hours / 24);
-    return `${days}d ago`;
+    return `${days}d${suffix}`;
 }
 
 function formatDateTime(timestamp) {
@@ -34,7 +35,11 @@ function updateTileUI(tile, statusInfo) {
     const urlEl = tile.querySelector('.url');
 
     if (urlEl && statusInfo.stats) {
-        urlEl.textContent = `${statusInfo.stats.used} / ${statusInfo.stats.size} (${statusInfo.stats.use})`;
+        let text = `${statusInfo.stats.used} / ${statusInfo.stats.size} (${statusInfo.stats.use})`;
+        if (statusInfo.raidStatus) {
+            text += ` | RAID: ${statusInfo.raidStatus}`;
+        }
+        urlEl.textContent = text;
     }
 
     if (!dot.classList.contains(newStatus)) {
@@ -48,7 +53,7 @@ function updateTileUI(tile, statusInfo) {
     }
 
     if (tile.dataset.showLastChecked === 'true' && statusInfo.lastChecked) {
-        lastCheckedEl.textContent = formatTimeAgo(statusInfo.lastChecked);
+        lastCheckedEl.textContent = formatTimeAgo(statusInfo.lastChecked, true);
     } else {
         lastCheckedEl.textContent = '';
     }

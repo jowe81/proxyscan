@@ -91,8 +91,13 @@ app.get('/', (req, res) => {
                 subtitle = svc.key;
             } else if (svc.type === 'storageVolume') {
                 uniqueKey = `storage:${svc.key}`;
-                const stats = statusData.services[uniqueKey]?.stats;
+                const statusEntry = statusData.services[uniqueKey];
+                const stats = statusEntry?.stats;
+                const raidStatus = statusEntry?.raidStatus;
                 subtitle = stats ? `${stats.used} / ${stats.size} (${stats.use})` : svc.key;
+                if (raidStatus) {
+                    subtitle += ` | RAID: ${raidStatus}`;
+                }
             }
             
             return {

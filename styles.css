@@ -61,19 +61,22 @@ li {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
     width: 280px;
-    height: 200px;
+    height: 135px;
 }
 li.type-websites {
     background-color: #ffffff;
 }
 li.type-systemServices {
-    background-color: #eaeaea;
+    background-color: #eafdf7;
 }
 li.type-networkChecks {
     background-color: #e4eaff;
 }
+li.type-storage {
+    background-color: #feedff;
+}
 li:hover {
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 12px rgba(91, 101, 255, 0.55);
     transform: translateY(-5px);
 }
 li a, li .service-card { 
@@ -82,7 +85,7 @@ li a, li .service-card {
     flex-direction: column;
     justify-content: center;
     align-items: center; 
-    padding: 1.5em 1em;
+    padding: 1rem;
     text-decoration: none; 
     color: inherit;
     border-radius: 8px;
