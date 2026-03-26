@@ -27,9 +27,16 @@ function formatDuration(start, end) {
 function updateTileUI(tile, statusInfo) {
     const dot = tile.querySelector('.status-dot');
     const lastSeenEl = tile.querySelector('.last-seen');
-    if (!dot || !lastSeenEl) return;
+    const lastCheckedEl = tile.querySelector('.last-checked');
+    if (!dot || !lastSeenEl || !lastCheckedEl) return;
 
     const newStatus = statusInfo.status || 'unknown';
+    const urlEl = tile.querySelector('.url');
+
+    if (urlEl && statusInfo.stats) {
+        urlEl.textContent = `${statusInfo.stats.used} / ${statusInfo.stats.size} (${statusInfo.stats.use})`;
+    }
+
     if (!dot.classList.contains(newStatus)) {
         dot.className = 'status-dot ' + newStatus;
     }
@@ -38,6 +45,12 @@ function updateTileUI(tile, statusInfo) {
         lastSeenEl.textContent = `Last seen: ${formatTimeAgo(statusInfo.lastSeenOnline)}`;
     } else {
         lastSeenEl.textContent = '';
+    }
+
+    if (tile.dataset.showLastChecked === 'true' && statusInfo.lastChecked) {
+        lastCheckedEl.textContent = formatTimeAgo(statusInfo.lastChecked);
+    } else {
+        lastCheckedEl.textContent = '';
     }
 }
 

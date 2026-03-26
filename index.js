@@ -60,13 +60,22 @@ app.get('/', (req, res) => {
             .map(s => ({ ...s, type: 'ping' }));
     }
 
-    const rawServices = [...nginxServices, ...headServices, ...systemNodes, ...pingServices];
+    // Prepare Storage Services
+    let storageServices = [];
+    if (config.serviceTypes?.storageVolume?.enabled) {
+        storageServices = (config.services || [])
+            .filter(s => s.type === 'storageVolume')
+            .map(s => ({ ...s, type: 'storageVolume' }));
+    }
+
+    const rawServices = [...nginxServices, ...headServices, ...systemNodes, ...pingServices, ...storageServices];
 
     const allServices = rawServices
         .filter(svc => svc.card !== false)
         .map(svc => {
             const serviceTypeConfig = config.serviceTypes?.[svc.type];
             const groupKey = serviceTypeConfig?.group || 'other';
+            const groupConfig = config.groups?.[groupKey];
             
             let uniqueKey, subtitle, link = null;
             
@@ -80,6 +89,10 @@ app.get('/', (req, res) => {
             } else if (svc.type === 'ping') {
                 uniqueKey = `ping:${svc.key}`;
                 subtitle = svc.key;
+            } else if (svc.type === 'storageVolume') {
+                uniqueKey = `storage:${svc.key}`;
+                const stats = statusData.services[uniqueKey]?.stats;
+                subtitle = stats ? `${stats.used} / ${stats.size} (${stats.use})` : svc.key;
             }
             
             return {
@@ -88,7 +101,8 @@ app.get('/', (req, res) => {
                 subtitle,
                 link,
                 status: statusData.services[uniqueKey]?.status || 'unknown',
-                groupKey
+                groupKey,
+                showLastChecked: !!(serviceTypeConfig?.showLastChecked || groupConfig?.showLastChecked)
             };
         })
         .sort((a, b) => {
@@ -104,16 +118,19 @@ app.get('/', (req, res) => {
         const listItems = allServices.map(svc => {
             const typeClass = `type-${svc.groupKey}`;
             const innerContent = `
-                <span class="status-dot ${svc.status}"></span>
+                <div class="status-container">
+                    <div class="last-checked"></div>
+                    <div class="status-dot ${svc.status}"></div>
+                </div>
                 <span class="name">${svc.name}</span>
                 <span class="url">${svc.subtitle}</span>
-                <span class="last-seen"></span>
+                <span class="last-seen">last seen</span>
             `;
 
             if (svc.link) {
-                return `<li class="${typeClass}" data-key="${svc.key}"><a href="${svc.link}" rel="noopener noreferrer">${innerContent}</a></li>`;
+                return `<li class="${typeClass}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><a href="${svc.link}" rel="noopener noreferrer">${innerContent}</a></li>`;
             } else {
-                return `<li class="${typeClass}" data-key="${svc.key}"><div class="service-card">${innerContent}</div></li>`;
+                return `<li class="${typeClass}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><div class="service-card">${innerContent}</div></li>`;
             }
         }).join('');
         content = `<ul>${listItems}</ul>`;

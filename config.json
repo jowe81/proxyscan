@@ -18,6 +18,11 @@
             "path": "/etc/nginx/sites-enabled",
             "group": "websites"
         },
+        "storageVolume": {
+            "enabled": true,
+            "interval": 360000,
+            "group": "storage"
+        },
         "connectivityCheck": {
             "enabled": true
         }
@@ -25,15 +30,23 @@
     "groups": {
         "networkChecks": {
             "name": "Network Checks",
-            "checkbox": true
+            "checkbox": true,
+            "showLastChecked": true
         },
         "websites": {
             "name": "Websites",
-            "checkbox": true
+            "checkbox": true,
+            "showLastChecked": true
+        },
+        "storage": {
+            "name": "Storage Volumes",
+            "checkbox": true,
+            "showLastChecked": true
         },
         "systemServices": {
             "name": "System Services",
-            "checkbox": true
+            "checkbox": true,
+            "showLastChecked": true
         }
     },
     "services": [
@@ -56,6 +69,19 @@
             "name": "Jowe.ca",
             "type": "head",
             "key": "https://jowe.ca"
+        },
+        {
+            "name": "Main RAID Storage",
+            "type": "storageVolume",
+            "key": "/dev/md0",
+            "options": {
+                "raid": true
+            }
+        },
+        {
+            "name": "Root Storage",
+            "type": "storageVolume",
+            "key": "/"
         },
         {
             "name": "Google DNS",
