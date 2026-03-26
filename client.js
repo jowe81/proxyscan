@@ -42,17 +42,79 @@ function updateTileUI(tile, statusInfo) {
 }
 
 // Since this script is loaded with 'defer', the DOM is guaranteed to be ready.
+// Filtering Logic
 const searchInput = document.getElementById('service-search');
-if (searchInput) {
-    const services = document.querySelectorAll('ul li');
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        services.forEach(service => {
-            const textContent = service.textContent.toLowerCase();
-            service.style.display = textContent.includes(searchTerm) ? '' : 'none';
-        });
+const typeCheckboxes = document.querySelectorAll('#type-filters input[type="checkbox"]');
+const services = document.querySelectorAll('ul li');
+
+// Load saved filter state from localStorage
+const savedFilters = JSON.parse(localStorage.getItem('proxyscan_filter_state') || '{}');
+typeCheckboxes.forEach(cb => {
+    if (Object.prototype.hasOwnProperty.call(savedFilters, cb.value)) {
+        cb.checked = savedFilters[cb.value];
+    }
+});
+
+function filterServices(e) {
+    const allCbs = Array.from(typeCheckboxes);
+    const allBtn = allCbs.find(cb => cb.value === 'all');
+    const groupCbs = allCbs.filter(cb => cb.value !== 'all');
+
+    // Handle interaction logic between "All" and specific groups
+    if (e && e.target && e.target.type === 'checkbox') {
+        if (e.target === allBtn && allBtn.checked) {
+            // If "All" is checked, uncheck all specific groups
+            groupCbs.forEach(cb => cb.checked = false);
+        } else if (e.target.checked) {
+            // If a specific group is checked, uncheck "All"
+            if (allBtn) allBtn.checked = false;
+
+            // If all groups are now checked, switch back to "All" mode
+            if (groupCbs.length > 0 && groupCbs.every(cb => cb.checked)) {
+                if (allBtn) allBtn.checked = true;
+                groupCbs.forEach(cb => cb.checked = false);
+            }
+        }
+    }
+
+    // Fallback: If nothing is checked, automatically check "All"
+    if (allBtn && !allCbs.some(cb => cb.checked)) {
+        allBtn.checked = true;
+    }
+
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+
+    const isAllMode = allBtn && allBtn.checked;
+    const checkedTypes = groupCbs.filter(cb => cb.checked).map(cb => cb.value);
+
+    // Visually grey out group filters when "All" is active
+    groupCbs.forEach(cb => {
+        const label = cb.parentElement;
+        if (label) label.style.opacity = isAllMode ? '0.5' : '1';
+    });
+
+    // Save current filter state to localStorage
+    const filterState = {};
+    typeCheckboxes.forEach(cb => { filterState[cb.value] = cb.checked; });
+    localStorage.setItem('proxyscan_filter_state', JSON.stringify(filterState));
+
+    services.forEach(service => {
+        const textContent = service.textContent.toLowerCase();
+        const matchesSearch = textContent.includes(searchTerm);
+
+        const matchesType = isAllMode || checkedTypes.some(type => service.classList.contains(type));
+        
+        service.style.display = (matchesSearch && matchesType) ? '' : 'none';
     });
 }
+
+if (searchInput) {
+    searchInput.addEventListener('input', filterServices);
+}
+typeCheckboxes.forEach(cb => cb.addEventListener('change', filterServices));
+
+// Apply initial filtering based on loaded state
+filterServices();
 
 // Modal Logic
 const historyBtn = document.getElementById('history-btn');

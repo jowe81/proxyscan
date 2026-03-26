@@ -1,0 +1,82 @@
+{
+    "serviceTypes": {
+        "systemd": {
+            "enabled": true,
+            "group": "systemServices"
+        },
+        "head": {
+            "enabled": true,
+            "interval": 60000,
+            "group": "websites"
+        },
+        "ping": {
+            "enabled": true,
+            "group": "networkChecks"
+        },
+        "nginx": {
+            "enabled": true,
+            "path": "/etc/nginx/sites-enabled",
+            "group": "websites"
+        },
+        "connectivityCheck": {
+            "enabled": true
+        }
+    },
+    "groups": {
+        "networkChecks": {
+            "name": "Network Checks",
+            "checkbox": true
+        },
+        "websites": {
+            "name": "Websites",
+            "checkbox": true
+        },
+        "systemServices": {
+            "name": "System Services",
+            "checkbox": true
+        }
+    },
+    "services": [
+        {
+            "name": "File Server",
+            "type": "systemd",
+            "key": "smbd"
+        },
+        {
+            "name": "Mongo DB",
+            "type": "systemd",
+            "key": "mongod"
+        },
+        {
+            "name": "Remote Ctrl Forwarder",
+            "type": "systemd",
+            "key": "remoteCtrlForwarder"
+        },
+        {
+            "name": "Jowe.ca",
+            "type": "head",
+            "key": "https://jowe.ca"
+        },
+        {
+            "name": "Google DNS",
+            "type": "ping",
+            "key": "8.8.8.8",
+            "card": false,
+            "useForConnectivityCheck": true
+        },
+        {
+            "name": "Cloudflare DNS",
+            "type": "ping",
+            "key": "1.1.1.1",
+            "card": false,
+            "useForConnectivityCheck": true
+        },
+        {
+            "name": "Quad9",
+            "type": "ping",
+            "key": "8.8.8.8",
+            "card": false,
+            "useForConnectivityCheck": true
+        }
+    ]
+}
