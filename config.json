@@ -109,5 +109,25 @@
             "card": false,
             "useForConnectivityCheck": true
         }
+    ],
+    "headerData": [
+        {
+            "name": "Woodstove",
+            "url": "http://iot.wnet.wn/automation_api/logical-device/iot.recroom_01.woodstove/data",
+            "jsonKey": "woodstoveState",
+            "formattingFunction": "formatWoodstoveState"
+        },
+        {
+            "name": "Woodshed",
+            "url": "http://iot.wnet.wn/automation_api/logical-device/iot.woodshed_01.batteryMonitor/data",
+            "jsonKey": "voltageRaw",
+            "formattingFunction": "formatLeadAcidBatteryVoltage"
+        },
+        {
+            "name": "Outside",
+            "url": "http://iot.wnet.wn/automation_api/logical-device/iot.woodshed_01.tempOutside/data",
+            "jsonKey": "tempC",
+            "formattingFunction": "formatTemperature"
+        }
     ]
 }

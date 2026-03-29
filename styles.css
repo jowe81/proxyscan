@@ -11,9 +11,34 @@ h1 {
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 150%;
+}
+#header-data {
+    max-width: 1200px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+.header-data-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+}
+.header-data-item span:first-child {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    color: #888;
 }
 h2 {
     color: #555;
@@ -139,7 +164,6 @@ li a:hover {
 }
 .history-icon {
     cursor: pointer;
-    margin-left: 0.5em;
     font-size: 1.2em;
     display: none; /* Hidden by default */
     user-select: none;
@@ -204,6 +228,16 @@ p {
         margin: 1em;
     }
     #type-filters {
-        gap: 0.8em 1.2em;
+        gap: 0.5rem 1.2em;
+    }
+    #header-data {
+        justify-content: center;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 0.5em;
+    }
+    h1 {
+        padding-bottom: 0.5em;
+        margin-bottom: 0.5em;
+        justify-content: center;
     }
 }

@@ -163,8 +163,18 @@ app.get('/', (req, res) => {
         activeCheckboxes.unshift('<label><input type="checkbox" value="all" checked> All Services</label>');
     }
 
-    const filtersHtml = activeCheckboxes.length > 0 ? `<div id="type-filters"><span style="font-weight: 500;">Show:</span>${activeCheckboxes.join('')}</div>` : '';
+    const filtersHtml = activeCheckboxes.length > 0 ? `<div id="type-filters"><span style="font-weight: 500;"></span>${activeCheckboxes.join('')}</div>` : '';
     const searchInputHtml = totalServices > searchThreshold ? '<input type="search" id="service-search" placeholder="Search services..." aria-label="Search services">' : '';
+
+    // Generate Header Data Items
+    const headerItemsHtml = (config.headerData || []).map(item => {
+        const value = statusData.headerData?.[item.name] || '...';
+        const id = `header-item-${item.name.replace(/\s+/g, '-').toLowerCase()}`;
+        return `<div class="header-data-item" id="${id}">
+            <span>${item.name}</span>
+            <span class="value">${value}</span>
+        </div>`;
+    }).join('');
 
     const clientScriptHtml = `<script>window.CONFIG = { pollInterval: ${frontendPollInterval} };</script>
 <script src="/client.js" defer></script>`;
@@ -176,6 +186,7 @@ app.get('/', (req, res) => {
         }
 
         const html = htmlTemplate
+            .replace('{{header_items}}', headerItemsHtml)
             .replace('{{search_bar}}', filtersHtml + searchInputHtml)
             .replace('{{internet_status}}', statusData.internet)
             .replace('{{content}}', content)

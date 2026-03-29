@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Monitor</title>
+    <title>5 Williston</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>
-        Service Monitor
-        <div id="internet-status">
+        Status Hub - 5 Williston Ct
+    </h1>
+    <div id="header-data">
+        <!-- other header-data-items should be injected here based on config.js -->
+        {{header_items}}
+        <div class="header-data-item" id="internet-status">
             <span>Internet</span>
             <span class="status-dot {{internet_status}}"></span>
-            <span id="history-btn" class="history-icon" title="View Outage History">🕒</span>
+            <span id="history-btn" class="history-icon" title="View Outage History">🕒</span>        
         </div>
-    </h1>
+    </div>
     <div id="modal-backdrop"></div>
     <div id="outage-modal">
         <h2>Internet Outage History</h2>

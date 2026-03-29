@@ -181,6 +181,17 @@ const updateAllStatuses = async () => {
             }
         }
 
+        if (data.headerData) {
+            Object.entries(data.headerData).forEach(([name, value]) => {
+                const id = `header-item-${name.replace(/\s+/g, '-').toLowerCase()}`;
+                const el = document.getElementById(id);
+                if (el) {
+                    const valueEl = el.querySelector('.value');
+                    if (valueEl) valueEl.innerHTML = value;
+                }
+            });
+        }
+
         const statuses = data.services || data;
         document.querySelectorAll('li[data-key]').forEach(serviceLi => {
             const key = serviceLi.dataset.key;
