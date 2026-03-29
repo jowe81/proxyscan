@@ -228,10 +228,17 @@ p {
         margin: 1em;
     }
     #type-filters {
-        gap: 0.5rem 1.2em;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem 1rem;
+    }
+    #type-filters span {
+        grid-column: 1 / -1;
     }
     #header-data {
-        justify-content: center;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem 1rem;
         border-bottom: 2px solid #ddd;
         padding-bottom: 0.5em;
     }
