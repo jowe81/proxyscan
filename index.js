@@ -133,9 +133,9 @@ app.get('/', (req, res) => {
             `;
 
             if (svc.link) {
-                return `<li class="${typeClass}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><a href="${svc.link}" rel="noopener noreferrer">${innerContent}</a></li>`;
+                return `<li class="${typeClass} ${svc.status}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><a href="${svc.link}" rel="noopener noreferrer">${innerContent}</a></li>`;
             } else {
-                return `<li class="${typeClass}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><div class="service-card">${innerContent}</div></li>`;
+                return `<li class="${typeClass} ${svc.status}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><div class="service-card">${innerContent}</div></li>`;
             }
         }).join('');
         content = `<ul>${listItems}</ul>`;
@@ -168,11 +168,52 @@ app.get('/', (req, res) => {
 
     // Generate Header Data Items
     const headerItemsHtml = (config.headerData || []).map(item => {
+        if (item.headerKey === 'connectivity') {
+            const isOffline = statusData.internet === 'offline';
+            const label = isOffline ? 'OFFLINE' : 'ONLINE';
+            const bgColor = isOffline ? '#dc3545' : '#28a745';
+
+            return `<div class="header-data-item" id="internet-status">
+                <span>${item.name}</span>
+                <a href="#" id="history-btn" class="value" onclick="return false;">
+                    <span class="value badge" style="background-color: ${bgColor}; color: #fff;">${label}</span>
+                </a>
+            </div>`;
+        }
+
+        if (item.headerKey === 'statusSummary') {
+            const anyDown = Object.values(statusData.services || {}).some(s => s.status === 'offline' || s.status === 'partial');
+            let summaryClass = 'online';
+            let summaryText = 'Healthy';
+            let bgColor = '#28a745';
+
+            if (statusData.internet === 'offline') {
+                summaryClass = 'offline';
+                summaryText = 'No Internet';
+                bgColor = '#dc3545';
+            } else if (anyDown) {
+                summaryClass = 'partial';
+                summaryText = 'Issues';
+                bgColor = "#dc3545";
+            }
+            return `<div class="header-data-item" id="header-status-summary">
+                <span>${item.name}</span>
+                <span class="value">
+                    <span class="value badge" style="background-color: ${bgColor}; color: #fff;">${summaryText}</span>
+                </span>
+            </div>`;
+        }
+
         const value = statusData.headerData?.[item.name] || '...';
         const id = `header-item-${item.name.replace(/\s+/g, '-').toLowerCase()}`;
+        
+        const valueHtml = item.url 
+            ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="value">${value}</a>`
+            : `<span class="value">${value}</span>`;
+
         return `<div class="header-data-item" id="${id}">
             <span>${item.name}</span>
-            <span class="value">${value}</span>
+            ${valueHtml}
         </div>`;
     }).join('');
 
@@ -185,12 +226,15 @@ app.get('/', (req, res) => {
             return res.status(500).send("Internal Server Error: Could not load template.");
         }
 
+        const anyDown = Object.values(statusData.services || {}).some(s => s.status === 'offline' || s.status === 'partial');
+        const hasIssues = statusData.internet === 'offline' || anyDown;
+
         const html = htmlTemplate
             .replace('{{header_items}}', headerItemsHtml)
             .replace('{{search_bar}}', filtersHtml + searchInputHtml)
-            .replace('{{internet_status}}', statusData.internet)
             .replace('{{content}}', content)
-            .replace('{{client_script}}', clientScriptHtml);
+            .replace('{{client_script}}', clientScriptHtml)
+            .replace('<body>', `<body class="${hasIssues ? 'has-issues' : ''}">`);
         res.send(html);
     });
 });

@@ -3,6 +3,10 @@ body {
     margin: 2em; 
     background-color: #f4f4f9; 
     color: #333; 
+    transition: background-color 0.8s ease;
+}
+body.has-issues {
+    background-color: #fff2f2;
 }
 h1 { 
     color: #444; 
@@ -33,6 +37,20 @@ h1 {
     gap: 0.5rem;
     font-size: 0.9rem;
     color: #555;
+}
+.value {
+    text-transform: uppercase;
+    text-decoration: none;
+    color: inherit;
+}
+.value.badge {
+    color: #fff;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: inline-block;
+    line-height: 1.4;
 }
 .header-data-item span:first-child {
     font-weight: 600;
@@ -94,13 +112,28 @@ li.type-websites {
     background-color: #ffffff;
 }
 li.type-systemServices {
-    background-color: #eafdf7;
+    background-color: #eaf9f4;
 }
 li.type-networkChecks {
     background-color: #e4eaff;
 }
 li.type-storage {
-    background-color: #feedff;
+    background-color: #edefff;
+}
+li.offline {
+    border: 1px solid #dc3545;
+    background-color: #ffd5d5;
+}
+li.partial {
+    box-shadow: 0 4px 5px rgba(255, 189, 46, 0.7);
+    border: 1px solid #fdbf14;
+    background-color: #ffe791;
+}
+li.offline:has(a):hover {
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.5);
+}
+li.partial:has(a):hover {
+    box-shadow: 0 8px 20px rgba(253, 126, 20, 0.4);
 }
 li:has(a):hover {
     box-shadow: 0 6px 12px rgba(0, 55, 255, .5);

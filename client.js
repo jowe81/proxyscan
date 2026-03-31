@@ -34,6 +34,9 @@ function updateTileUI(tile, statusInfo) {
     const newStatus = statusInfo.status || 'unknown';
     const urlEl = tile.querySelector('.url');
 
+    tile.classList.remove('online', 'offline', 'partial', 'unknown');
+    tile.classList.add(newStatus);
+
     if (urlEl && statusInfo.stats) {
         let text = `${statusInfo.stats.used} / ${statusInfo.stats.size} (${statusInfo.stats.use})`;
         if (statusInfo.raidStatus) {
@@ -61,6 +64,10 @@ function updateTileUI(tile, statusInfo) {
 
 // Since this script is loaded with 'defer', the DOM is guaranteed to be ready.
 // Filtering Logic
+const originalTitle = document.title;
+let titleCycleInterval = null;
+let titleCycleIndex = 0;
+let currentTitles = [originalTitle];
 const searchInput = document.getElementById('service-search');
 const typeCheckboxes = document.querySelectorAll('#type-filters input[type="checkbox"]');
 const services = document.querySelectorAll('ul li');
@@ -157,13 +164,19 @@ const updateAllStatuses = async () => {
         if (!response.ok) return;
         const data = await response.json();
 
-        const internetDot = document.querySelector('#internet-status .status-dot');
-        if (internetDot && data.internet) {
-            internetDot.className = 'status-dot ' + data.internet;
+        const internetLabel = document.getElementById('history-btn');
+        if (internetLabel && data.internet) {
+            const badge = internetLabel.querySelector('.badge');
+            if (badge) {
+                const isOffline = data.internet === 'offline';
+                badge.textContent = isOffline ? 'OFFLINE' : 'ONLINE';
+                badge.style.backgroundColor = isOffline ? '#dc3545' : '#28a745';
+                badge.style.color = '#fff';
+            }
         }
 
         if (historyBtn && data.outageHistory) {
-            historyBtn.style.display = 'inline-block';
+            // The button is now the status text, so we keep it visible.
             
             const list = document.getElementById('outage-list');
             if (list) {
@@ -190,6 +203,54 @@ const updateAllStatuses = async () => {
                     if (valueEl) valueEl.innerHTML = value;
                 }
             });
+        }
+
+        const summaryContainer = document.getElementById('header-status-summary');
+        if (summaryContainer && data.services) {
+            const summaryBadge = summaryContainer.querySelector('.badge');
+            const services = Object.values(data.services);
+            const anyDown = services.some(s => s.status === 'offline' || s.status === 'partial');
+            let summaryClass = 'online';
+            let summaryText = 'Healthy';
+            let bgColor = '#28a745';
+            if (data.internet === 'offline') {
+                summaryClass = 'offline';
+                summaryText = 'No Internet';
+                bgColor = '#dc3545';
+            } else if (anyDown) {
+                summaryClass = 'partial';
+                summaryText = 'Issues';
+                bgColor = "#dc3545";
+            }
+            if (summaryBadge) {
+                summaryBadge.style.backgroundColor = bgColor;
+                summaryBadge.style.color = '#fff';
+                summaryBadge.textContent = summaryText;
+            }
+
+            document.body.classList.toggle('has-issues', data.internet === 'offline' || anyDown);
+        }
+
+        if (data.pageTitles) {
+            const nextTitles = [originalTitle, ...data.pageTitles];
+            const hasChanged = nextTitles.length !== currentTitles.length || 
+                               nextTitles.some((t, i) => t !== currentTitles[i]);
+
+            if (hasChanged) {
+                currentTitles = nextTitles;
+                if (titleCycleInterval) clearInterval(titleCycleInterval);
+
+                if (currentTitles.length > 1) {
+                    titleCycleIndex = 0;
+                    document.title = currentTitles[0];
+                    titleCycleInterval = setInterval(() => {
+                        titleCycleIndex = (titleCycleIndex + 1) % currentTitles.length;
+                        document.title = currentTitles[titleCycleIndex];
+                    }, 3000);
+                } else {
+                    document.title = originalTitle;
+                }
+            }
         }
 
         const statuses = data.services || data;

@@ -51,6 +51,11 @@
     },
     "services": [
         {
+            "name": "DHCP Server",
+            "type": "systemd",
+            "key": "isc-dhcp-server"
+        },
+        {
             "name": "File Server",
             "type": "systemd",
             "key": "smbd"
@@ -113,21 +118,45 @@
     "headerData": [
         {
             "name": "Woodstove",
-            "url": "http://iot.wnet.wn/automation_api/logical-device/iot.recroom_01.woodstove/data",
+            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.recroom_01.woodstove/data",
             "jsonKey": "woodstoveState",
-            "formattingFunction": "formatWoodstoveState"
+            "formattingFunction": "formatWoodstoveState",
+            "url": "http://iot.wn/graph.html?deviceId=recroom_01&fields=data.Sensor.DS18B20.woodstove.tempC%2Cdata.Sensor.DS18B20.woodstove.woodstoveState&timeframe=12h&accuracy=raw&interpolation=linear",
+            "setPageTitle": {
+                "jsonKey": "woodstoveState",
+                "equals": "refuel",
+                "pageTitleOverride": "REFUEL the Woodstove!"
+            }
         },
         {
             "name": "Woodshed",
-            "url": "http://iot.wnet.wn/automation_api/logical-device/iot.woodshed_01.batteryMonitor/data",
+            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.woodshed_01.batteryMonitor/data",
             "jsonKey": "voltageRaw",
-            "formattingFunction": "formatLeadAcidBatteryVoltage"
+            "formattingFunction": "formatLeadAcidBatteryVoltage",
+            "url": "http://iot.wn/graph.html?deviceId=woodshed_01&fields=data.System.BatteryMonitor.batteryMonitor.netCharge_Wh%2Cdata.System.BatteryMonitor.batteryMonitor.voltageRaw&timeframe=7d&accuracy=raw&interpolation=linear"
         },
         {
             "name": "Outside",
-            "url": "http://iot.wnet.wn/automation_api/logical-device/iot.woodshed_01.tempOutside/data",
+            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.woodshed_01.tempOutside/data",
             "jsonKey": "tempC",
-            "formattingFunction": "formatTemperature"
+            "formattingFunction": "formatTemperature",
+            "url": "http://iot.wn/graph.html?deviceId=woodshed_01&fields=data.Sensor.DS18B20.tempOutside.tempC&timeframe=24h&accuracy=raw&interpolation=linear"
+        },
+        {
+            "name": "Inside",
+            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.livingroom_01.shtSensor/data",
+            "jsonKey": "tempC",
+            "formattingFunction": "formatTemperature",
+            "url": "http://iot.wn/graph.html?deviceId=woodshed_01&fields=data.Sensor.DS18B20.tempOutside.tempC&timeframe=24h&accuracy=raw&interpolation=linear"
+        },
+        {
+            "name": "Internet",
+            "headerKey": "connectivity"
+        },
+        {
+            "name": "Status",
+            "headerKey": "statusSummary",
+            "setPageTitle": true
         }
     ]
 }
