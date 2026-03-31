@@ -68,6 +68,7 @@ const originalTitle = document.title;
 let titleCycleInterval = null;
 let titleCycleIndex = 0;
 let currentTitles = [originalTitle];
+let lastAnyDown = false;
 const searchInput = document.getElementById('service-search');
 const typeCheckboxes = document.querySelectorAll('#type-filters input[type="checkbox"]');
 const services = document.querySelectorAll('ul li');
@@ -127,7 +128,10 @@ function filterServices(e) {
         const textContent = service.textContent.toLowerCase();
         const matchesSearch = textContent.includes(searchTerm);
 
-        const matchesType = isAllMode || checkedTypes.some(type => service.classList.contains(type));
+        const matchesType = isAllMode || checkedTypes.some(type => {
+            if (type === 'status-issue') return service.classList.contains('offline') || service.classList.contains('partial');
+            return service.classList.contains(type);
+        });
         
         service.style.display = (matchesSearch && matchesType) ? '' : 'none';
     });
@@ -205,6 +209,14 @@ const updateAllStatuses = async () => {
             });
         }
 
+        const statuses = data.services || data;
+        document.querySelectorAll('li[data-key]').forEach(serviceLi => {
+            const key = serviceLi.dataset.key;
+            if (statuses[key]) {
+                updateTileUI(serviceLi, statuses[key]);
+            }
+        });
+
         const summaryContainer = document.getElementById('header-status-summary');
         if (summaryContainer && data.services) {
             const summaryBadge = summaryContainer.querySelector('.badge');
@@ -229,6 +241,24 @@ const updateAllStatuses = async () => {
             }
 
             document.body.classList.toggle('has-issues', data.internet === 'offline' || anyDown);
+
+            const degradedFilter = document.getElementById('degraded-filter');
+            if (degradedFilter) {
+                const cb = degradedFilter.querySelector('input');
+                if (anyDown && !lastAnyDown && cb) {
+                    // Auto-check when issues first appear and uncheck others
+                    cb.checked = true;
+                    typeCheckboxes.forEach(other => {
+                        if (other !== cb) other.checked = false;
+                    });
+                    filterServices();
+                } else if (!anyDown && cb && cb.checked) {
+                    cb.checked = false;
+                    filterServices();
+                }
+                degradedFilter.style.display = anyDown ? 'inline' : 'none';
+            }
+            lastAnyDown = anyDown;
         }
 
         if (data.pageTitles) {
@@ -253,13 +283,6 @@ const updateAllStatuses = async () => {
             }
         }
 
-        const statuses = data.services || data;
-        document.querySelectorAll('li[data-key]').forEach(serviceLi => {
-            const key = serviceLi.dataset.key;
-            if (statuses[key]) {
-                updateTileUI(serviceLi, statuses[key]);
-            }
-        });
     } catch (error) {
         console.error('Failed to fetch service statuses:', error);
     }

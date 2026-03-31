@@ -159,8 +159,11 @@ app.get('/', (req, res) => {
         })
         .filter(Boolean);
 
-    if (activeCheckboxes.length > 0) {
+    const hasIssues = allServices.some(s => s.status === 'offline' || s.status === 'partial');
+    if (activeCheckboxes.length > 0 || hasIssues) {
         activeCheckboxes.unshift('<label><input type="checkbox" value="all" checked> All Services</label>');
+
+        activeCheckboxes.push(`<label id="degraded-filter" style="display: ${hasIssues ? 'inline' : 'none'}; color: #dc3545;"><input type="checkbox" value="status-issue"> Issues</label>`);
     }
 
     const filtersHtml = activeCheckboxes.length > 0 ? `<div id="type-filters"><span style="font-weight: 500;"></span>${activeCheckboxes.join('')}</div>` : '';
