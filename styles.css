@@ -6,7 +6,7 @@ body {
     transition: background-color 0.8s ease;
 }
 body.has-issues {
-    background-color: #fff2f2;
+    background-color: #fce7e7;
 }
 h1 { 
     color: #444; 
@@ -15,7 +15,7 @@ h1 {
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 0;
+    margin-bottom: 0.2em;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -277,7 +277,7 @@ p {
     }
     h1 {
         padding-bottom: 0.5em;
-        margin-bottom: 0.5em;
+        margin-bottom: 0.3em;
         justify-content: center;
     }
 }
