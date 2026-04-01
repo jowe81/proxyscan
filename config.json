@@ -1,4 +1,7 @@
 {
+    "settings": {
+        "pageTitle": "Status Hub - 5 Williston Ct"
+    },
     "serviceTypes": {
         "systemd": {
             "enabled": true,

@@ -232,7 +232,9 @@ app.get('/', (req, res) => {
         const anyDown = Object.values(statusData.services || {}).some(s => s.status === 'offline' || s.status === 'partial');
         const hasIssues = statusData.internet === 'offline' || anyDown;
 
+        const pageTitle = config.settings?.pageTitle || 'Status Hub';
         const html = htmlTemplate
+            .replace(/{{pageTitle}}/g, pageTitle)
             .replace('{{header_items}}', headerItemsHtml)
             .replace('{{search_bar}}', filtersHtml + searchInputHtml)
             .replace('{{content}}', content)
