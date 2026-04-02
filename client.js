@@ -162,6 +162,16 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') toggleModal(false);
 });
 
+const FAVICONS = {
+    green: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2328a745'/></svg>",
+    red: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23dc3545'/></svg>"
+};
+
+function updateFavicon(hasIssues) {
+    const link = document.querySelector("link[rel*='icon']");
+    if (link) link.href = hasIssues ? FAVICONS.red : FAVICONS.green;
+}
+
 const updateAllStatuses = async () => {
     try {
         const response = await fetch('/api/status');
@@ -234,13 +244,17 @@ const updateAllStatuses = async () => {
                 summaryText = 'Issues';
                 bgColor = "#dc3545";
             }
+
+            const hasIssues = data.internet === 'offline' || anyDown;
+            updateFavicon(hasIssues);
+
             if (summaryBadge) {
                 summaryBadge.style.backgroundColor = bgColor;
                 summaryBadge.style.color = '#fff';
                 summaryBadge.textContent = summaryText;
             }
 
-            document.body.classList.toggle('has-issues', data.internet === 'offline' || anyDown);
+            document.body.classList.toggle('has-issues', hasIssues);
 
             const degradedFilter = document.getElementById('degraded-filter');
             if (degradedFilter) {

@@ -232,12 +232,17 @@ app.get('/', (req, res) => {
         const anyDown = Object.values(statusData.services || {}).some(s => s.status === 'offline' || s.status === 'partial');
         const hasIssues = statusData.internet === 'offline' || anyDown;
 
+        const faviconGreen = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2328a745'/></svg>";
+        const faviconRed = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23dc3545'/></svg>";
+        const faviconUrl = hasIssues ? faviconRed : faviconGreen;
+
         const pageTitle = config.settings?.pageTitle || 'Status Hub';
         const html = htmlTemplate
             .replace(/{{pageTitle}}/g, pageTitle)
             .replace('{{header_items}}', headerItemsHtml)
             .replace('{{search_bar}}', filtersHtml + searchInputHtml)
             .replace('{{content}}', content)
+            .replace('{{favicon_url}}', faviconUrl)
             .replace('{{client_script}}', clientScriptHtml)
             .replace('<body>', `<body class="${hasIssues ? 'has-issues' : ''}">`);
         res.send(html);
