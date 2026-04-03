@@ -133,7 +133,8 @@ app.get('/', (req, res) => {
             `;
 
             if (svc.link) {
-                return `<li class="${typeClass} ${svc.status}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><a href="${svc.link}" rel="noopener noreferrer">${innerContent}</a></li>`;
+                const targetName = `target-${svc.link.replace(/\/+$/, '').replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+                return `<li class="${typeClass} ${svc.status}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><a href="${svc.link}" target="${targetName}">${innerContent}</a></li>`;
             } else {
                 return `<li class="${typeClass} ${svc.status}" data-key="${svc.key}" data-show-last-checked="${svc.showLastChecked}"><div class="service-card">${innerContent}</div></li>`;
             }
@@ -209,9 +210,10 @@ app.get('/', (req, res) => {
 
         const value = statusData.headerData?.[item.name] || '...';
         const id = `header-item-${item.name.replace(/\s+/g, '-').toLowerCase()}`;
+        const targetName = item.url ? `target-${item.url.replace(/\/+$/, '').replace(/[^a-z0-9]/gi, '-').toLowerCase()}` : '_blank';
         
         const valueHtml = item.url 
-            ? `<a href="${item.url}" target="_blank" rel="noopener noreferrer" class="value">${value}</a>`
+            ? `<a href="${item.url}" target="${targetName}" class="value">${value}</a>`
             : `<span class="value">${value}</span>`;
 
         return `<div class="header-data-item" id="${id}">
