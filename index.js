@@ -186,20 +186,17 @@ app.get('/', (req, res) => {
         }
 
         if (item.headerKey === 'statusSummary') {
-            const anyDown = Object.values(statusData.services || {}).some(s => s.status === 'offline' || s.status === 'partial');
-            let summaryClass = 'online';
             let summaryText = 'Healthy';
             let bgColor = '#28a745';
 
-            if (statusData.internet === 'offline') {
-                summaryClass = 'offline';
-                summaryText = 'No Internet';
+            if (statusData.globalStatus === 'error') {
+                summaryText = statusData.internet === 'offline' ? 'No Internet' : 'Errors';
                 bgColor = '#dc3545';
-            } else if (anyDown) {
-                summaryClass = 'partial';
-                summaryText = 'Issues';
-                bgColor = "#dc3545";
+            } else if (statusData.globalStatus === 'alert') {
+                summaryText = statusData.internet === 'partial' ? 'Degraded' : 'Alerts';
+                bgColor = '#fd7e14';
             }
+
             return `<div class="header-data-item" id="header-status-summary">
                 <span>${item.name}</span>
                 <span class="value">
@@ -231,12 +228,15 @@ app.get('/', (req, res) => {
             return res.status(500).send("Internal Server Error: Could not load template.");
         }
 
-        const anyDown = Object.values(statusData.services || {}).some(s => s.status === 'offline' || s.status === 'partial');
-        const hasIssues = statusData.internet === 'offline' || anyDown;
-
         const faviconGreen = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2328a745'/></svg>";
         const faviconRed = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23dc3545'/></svg>";
-        const faviconUrl = hasIssues ? faviconRed : faviconGreen;
+        const faviconOrange = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23fd7e14'/></svg>";
+        
+        let faviconUrl = faviconGreen;
+        if (statusData.globalStatus === 'error') faviconUrl = faviconRed;
+        else if (statusData.globalStatus === 'alert') faviconUrl = faviconOrange;
+
+        const bodyClass = statusData.globalStatus !== 'healthy' ? `has-${statusData.globalStatus}` : '';
 
         const pageTitle = config.settings?.pageTitle || 'Status Hub';
         const html = htmlTemplate
@@ -246,7 +246,7 @@ app.get('/', (req, res) => {
             .replace('{{content}}', content)
             .replace('{{favicon_url}}', faviconUrl)
             .replace('{{client_script}}', clientScriptHtml)
-            .replace('<body>', `<body class="${hasIssues ? 'has-issues' : ''}">`);
+            .replace('<body>', `<body class="${bodyClass}">`);
         res.send(html);
     });
 });

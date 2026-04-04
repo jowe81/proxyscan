@@ -164,12 +164,16 @@ document.addEventListener('keydown', (e) => {
 
 const FAVICONS = {
     green: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2328a745'/></svg>",
-    red: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23dc3545'/></svg>"
+    red: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23dc3545'/></svg>",
+    orange: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23fd7e14'/></svg>"
 };
 
-function updateFavicon(hasIssues) {
+function updateFavicon(status) {
     const link = document.querySelector("link[rel*='icon']");
-    if (link) link.href = hasIssues ? FAVICONS.red : FAVICONS.green;
+    if (!link) return;
+    if (status === 'error') link.href = FAVICONS.red;
+    else if (status === 'alert') link.href = FAVICONS.orange;
+    else link.href = FAVICONS.green;
 }
 
 const updateAllStatuses = async () => {
@@ -230,23 +234,19 @@ const updateAllStatuses = async () => {
         const summaryContainer = document.getElementById('header-status-summary');
         if (summaryContainer && data.services) {
             const summaryBadge = summaryContainer.querySelector('.badge');
-            const services = Object.values(data.services);
-            const anyDown = services.some(s => s.status === 'offline' || s.status === 'partial');
-            let summaryClass = 'online';
+            const anyDown = Object.values(data.services).some(s => s.status === 'offline' || s.status === 'partial');
+            
             let summaryText = 'Healthy';
             let bgColor = '#28a745';
-            if (data.internet === 'offline') {
-                summaryClass = 'offline';
-                summaryText = 'No Internet';
+            if (data.globalStatus === 'error') {
+                summaryText = data.internet === 'offline' ? 'No Internet' : 'Errors';
                 bgColor = '#dc3545';
-            } else if (anyDown) {
-                summaryClass = 'partial';
-                summaryText = 'Issues';
-                bgColor = "#dc3545";
+            } else if (data.globalStatus === 'alert') {
+                summaryText = data.internet === 'partial' ? 'Degraded' : 'Alerts';
+                bgColor = '#fd7e14';
             }
 
-            const hasIssues = data.internet === 'offline' || anyDown;
-            updateFavicon(hasIssues);
+            updateFavicon(data.globalStatus);
 
             if (summaryBadge) {
                 summaryBadge.style.backgroundColor = bgColor;
@@ -254,7 +254,10 @@ const updateAllStatuses = async () => {
                 summaryBadge.textContent = summaryText;
             }
 
-            document.body.classList.toggle('has-issues', hasIssues);
+            document.body.classList.remove('has-error', 'has-alert');
+            if (data.globalStatus !== 'healthy') {
+                document.body.classList.add(`has-${data.globalStatus}`);
+            }
 
             const degradedFilter = document.getElementById('degraded-filter');
             if (degradedFilter) {

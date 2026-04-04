@@ -128,7 +128,8 @@
             "setPageTitle": {
                 "jsonKey": "woodstoveState",
                 "equals": "refuel",
-                "pageTitleOverride": "REFUEL the Woodstove!"
+                "pageTitleOverride": "REFUEL the Woodstove!",
+                "triggerGlobalStatus": "alert"
             }
         },
         {

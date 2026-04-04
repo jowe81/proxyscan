@@ -5,8 +5,11 @@ body {
     color: #333; 
     transition: background-color 0.8s ease;
 }
-body.has-issues {
+body.has-error {
     background-color: #fce7e7;
+}
+body.has-alert {
+    background-color: #fffef2;
 }
 h1 { 
     color: #444; 
