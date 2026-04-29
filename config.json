@@ -120,11 +120,18 @@
     ],
     "headerData": [
         {
+            "name": "Furnace",
+            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.furnace_closet_01.furnace/data",
+            "jsonKey": "isOn",
+            "formattingFunction": "formatFurnaceState",
+            "url": "http://iot.wn/graph_all.html?deviceId=aggregates&timeframe=24h&accuracy=raw&interpolation=linear&fields=aggregates%3Adata.Sensor.aggregateTemp.spatialAverageInsideRolling.tempC%2Cfurnace_closet_01%3Adata.DeviceControl.Relay.furnace.isOn"
+        },
+        {
             "name": "Woodstove",
             "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.recroom_01.woodstove/data",
             "jsonKey": "woodstoveState",
             "formattingFunction": "formatWoodstoveState",
-            "url": "http://iot.wn/graph.html?deviceId=recroom_01&fields=data.Sensor.DS18B20.woodstove.tempC%2Cdata.Sensor.DS18B20.woodstove.woodstoveState&timeframe=12h&accuracy=raw&interpolation=linear",
+            "url": "http://iot.wn/graph_all.html?deviceId=aggregates&timeframe=12h&accuracy=raw&interpolation=linear&fields=aggregates%3Adata.Sensor.aggregateTemp.spatialAverageInsideRolling.tempC%2Cfurnace_closet_01%3Adata.DeviceControl.Relay.furnace.isOn%2Crecroom_01%3Adata.Sensor.DS18B20.woodstove.tempC%2Crecroom_01%3Adata.Sensor.DS18B20.woodstove.woodstoveState",
             "setPageTitle": {
                 "jsonKey": "woodstoveState",
                 "equals": "refuel",
@@ -148,10 +155,10 @@
         },
         {
             "name": "Inside",
-            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.livingroom_01.shtSensor/data",
+            "dataUrl": "http://iot.wnet.wn/automation_api/logical-device/iot.aggregates.spatialAverageInside/data",
             "jsonKey": "tempC",
             "formattingFunction": "formatTemperature",
-            "url": "http://iot.wn/graph.html?deviceId=woodshed_01&fields=data.Sensor.DS18B20.tempOutside.tempC&timeframe=24h&accuracy=raw&interpolation=linear"
+            "url": "http://iot.wn/graph_all.html?deviceId=aggregates&timeframe=24h&accuracy=raw&interpolation=linear&fields=aggregates%3Adata.Sensor.aggregateTemp.spatialAverageInsideRolling.tempC%2Cfurnace_closet_01%3Adata.Sensor.DS18B20.recroom.tempC%2Ckitchen_01%3Adata.Sensor.DS18B20.tempKitchen.tempC%2ClaundryRoom_legacy%3Adata.Sensor.DS18B20.laundryRoom.tempC%2Clivingroom_01%3Adata.Sensor.SHT31.shtSensor.tempC%2Coffice_johannes_01%3Adata.Sensor.SHT31.shtSensor.tempC%2Cwoodshed_01%3Adata.Sensor.DS18B20.tempOutside.tempC"
         },
         {
             "name": "Internet",
